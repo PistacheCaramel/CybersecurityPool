@@ -6,9 +6,10 @@ run	:
 
 all	:	build run
 clean	:
-		rm -rf ./src/*
-		docker stop env_spider
-		docker rm env_spider
+		rm src/*.o spider
+		docker stop $$(docker ps -a -q)
+		docker rm $$(docker ps -a -q)
+		docker rmi $$(docker images -a -q)
 
 
 re	:	clean all
