@@ -2,40 +2,14 @@
 #include <curl/curl.h>
 #include <vector>
 #include <string>
+#include <string.h>
 #include <fstream>
+#include <libxml/tree.h>
+#include <libxml/parser.h>
+#include <libxml/HTMLparser.h>
 
-struct  s_img
-{
-    std::string url;
-    void        *data;
-    std::string metadata; 
-};
 
-struct  s_link
-{
-    std::string url;
-    std::string html;
-};
 
-struct  s_all
-{
-    std::vector<s_link> all_pages;
-    std::vector<s_img>  all_img;
-};
-
-std::vector<struct T>::iterator    search_by_url(std::vector<class T> tosearch, std::string searching)
-{
-    std::vector<struct T>::iterator  it;
-
-    it = tosearch.begin();
-    while (it != tosearch.end())
-    {
-        if ((*it).url.compare(searching) == 0)
-            return(it);
-        it++;
-    }
-    return (it);
-}
 // Fonction de rappel pour traiter les données reçues par libcurl
 size_t writeCallback(char *ptr, size_t size, size_t nmemb, std::string* userdata) {
     size_t total_size = size * nmemb;
@@ -89,7 +63,7 @@ void		get_image_data_from_url(std::string url)
     outputFile.close();
 
 }
-std::string	get_data_from_url(std::string url)
+const char	*get_data_from_url(std::string url)
 {   
     // libcurl Initialize
 	std::cout << "Url:" << url << std::endl;
@@ -117,23 +91,38 @@ std::string	get_data_from_url(std::string url)
 	return (NULL);
     }
     curl_easy_cleanup(curl);
-    return (response);
+    return (response.c_str());
 }
 
-s_all   *link_handler(s_all *all, std::string url, int lvl)
+void   link_handler(std::string url, int lvl)
 {
-    	std::vector<std::string>	img_links;
-	std::string			html_data;
-	std::vector<std::string>::iterator	it;
-	std::vector<const char *>		imgs_data;
-	size_t				pos;
+//    	std::vector<std::string>	img_links;
+	const char			*html_data;
+//	std::vector<std::string>::iterator	it;
+//	std::vector<const char *>		imgs_data;
+//	size_t				pos;
+	htmlDocPtr			html_doc;
+	xmlNodePtr			node;
 
-    (void)all;
     if (lvl > 5)
-        return (NULL);
+        return; 
     html_data = get_data_from_url(url);
-	pos = 0;
-    if (html_data.empty())
+    html_doc = htmlReadMemory(html_data, strlen(html_data), NULL, NULL, HTML_PARSE_RECOVER | HTML_PARSE_NOERROR);
+    xmlNodePtr rootNode = xmlDocGetRootElement(html_doc);
+    node = rootNode;
+    while (node)
+	{
+		if (node->type == XML_ELEMENT_NODE)
+		{
+			if (xmlStrcmp(node->name, (const xmlChar*)"img") == 0)
+			{
+			 	std::cout << node->properties << std::endl;
+			 }
+		}
+		node = node->next;
+	}
+
+/*    if (html_data.empty())
 		return (NULL);
 	while ((pos = html_data.find("<img", pos)) != std::string::npos)
 	{
@@ -158,15 +147,14 @@ s_all   *link_handler(s_all *all, std::string url, int lvl)
 			get_image_data_from_url(*it);
 		std::cout << *it << std::endl;
 		it++;
-	}
+	}*/
  
-    return 0;
+    return ;
 }
 
 int main(int ac, char **av) {
-    s_all   all;
 
    (void) ac;
-    link_handler(&all, av[1], 0);
+    link_handler(av[1], 0);
 }
 	

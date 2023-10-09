@@ -2,7 +2,7 @@
 build	: 
 	docker build -t env_spider .
 run	: 
-	docker run -v ./src:/arachnida -it env_spider
+	docker run -v $$(pwd)/src:/arachnida -it env_spider
 
 all	:	build run
 clean	:

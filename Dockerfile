@@ -1,14 +1,13 @@
 FROM alpine:latest
 
 
-RUN apk update && apk add --no-cache g++ make curl curl-dev
-
+RUN apk update && apk add --no-cache g++ make curl curl-dev 
 
 WORKDIR arachnida
 
-COPY ./src/* .
+COPY ./src/* ./
 
-RUN make
+RUN apk add libxml2 libxml2-dev ; make
 
 CMD ["/bin/sh"]
 
