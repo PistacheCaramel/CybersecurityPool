@@ -1,17 +1,17 @@
 NAME	= spider
 
-SRCS	= main.cpp
+SRCS	= main.c data_getter.c data_parsing.c
 
-CC	= c++
+CC	= gcc
 
-OBJS	= $(SRCS:.cpp=.o)
+OBJS	= $(SRCS:.c=.o)
 
 CFLAGS	= -Wall -Wextra -Werror -g3
 
 INCLUDES = -I/usr/include/libxml2
 all	:	$(NAME)
 
-%.o	:	%.cpp
+%.o	:	%.c
 		$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@ 
 
 $(NAME)	:	$(OBJS)
