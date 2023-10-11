@@ -1,51 +1,44 @@
 #include "spider.h"
 
-size_t writeCallback(void *rec, size_t size, size_t nmemb, void *userdata) {
-    size_t total_size = size * nmemb;
-    struct s_data	*data;
+uint	wc(char *in, size_t size, size_t nmemb, TidyBuffer *out) 
+{
+	uint r;
 
-    data = (struct s_data *)userdata;
-    char *ptr = (char*)realloc(data->data, data->size + total_size + 1);
-    if(ptr == NULL)
-    return 0;  /* out of memory! */
-
-  data->data = ptr;
-  memcpy(&(data->data[data->size]), rec, total_size);
-  data->size += total_size;
-  data->data[data->size] = 0;
-    return total_size;
+	r = size * nmemb;
+	tidyBufAppend(out, in, r);
+	return r;
 }
 
-struct s_data	get_data_from_url(const char *url)
+int	get_data_from_url(const char *url, TidyDoc *tdoc, TidyBuffer *docbuf, TidyBuffer *tidy_errbuff, int *err)
 {
-	struct s_data  response;
+	char curl_errbuf[CURL_ERROR_SIZE];
 
-    response.data = NULL;
-    response.size = 0;
 	
     // libcurl Initialize
 	printf("Url:%s\n", url);
     CURL* curl = curl_easy_init();
     if (!curl) {
         printf("Erreur lors de l'initialisation de libcurl\n");
-        return (response);
+        return (1);
     }
 
     // Set request
-    curl_easy_setopt(curl, CURLOPT_URL, url);
+	curl_easy_setopt(curl, CURLOPT_URL, url);
+	curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, curl_errbuf);
+	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
+	curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, wc);
+    // Set tidy with curl to save data
+	*tdoc = tidyCreate();
+	tidyOptSetBool(*tdoc, TidyForceOutput, yes); /* try harder */
+	tidyOptSetInt(*tdoc, TidyWrapLen, 4096);
+	tidySetErrorBuffer(*tdoc, tidy_errbuff);
+	tidyBufInit(docbuf);
 
-    // Save the data in a string
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, docbuf);
     // Execute the request
-    CURLcode res = curl_easy_perform(curl);
-    // Error check
-    if (res != CURLE_OK) {
-        printf("Erreur lors de la requête : %s\n", curl_easy_strerror(res));
-    	curl_easy_cleanup(curl);
-    }
+    *err = (int)curl_easy_perform(curl);
+    // Clean-up
     curl_easy_cleanup(curl);
-    return (response);
+    return (0);
 }
-

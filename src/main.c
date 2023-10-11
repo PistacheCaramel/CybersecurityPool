@@ -1,20 +1,51 @@
 #include "spider.h"
 
-void   link_handler(const char *url, int lvl)
+int   link_handler(const char *url, int lvl)
 {
-	struct s_data		html_data;
+	TidyDoc		tdoc;
+	TidyBuffer	docbuf = {0};
+	TidyBuffer	tidy_errbuf = {0};
+	int 		err;
 
-if (lvl > 5)
-        return; 
-    html_data = get_data_from_url(url);
-    printf("size:%ld\n", html_data.size);
-    if (html_data.data)
-	html_data_parsing(html_data);
+	if (lvl > 2)
+        	return (0); 
+     // Data getter
+	get_data_from_url(url, &tdoc, &docbuf, &tidy_errbuf, &err);
+	if(!err)
+	{
+		err = tidyParseBuffer(tdoc, &docbuf); /* parse the input */
+		if(err >= 0)
+		{
+			err = tidyCleanAndRepair(tdoc); /* fix any problems */
+			if(err >= 0)
+			{
+				err = tidyRunDiagnostics(tdoc); /* load tidy error buffer */
+				printf("///////    STOOOOP ////\n");
+				if(err >= 0)
+				{
+					html_data_parsing(tdoc, tidyGetRoot(tdoc), 0, lvl, url); /* walk the tree */
+					//fprintf(stderr, "%s\n", tidy_errbuf.bp);  show errors 
+				}
+			}
+		}
+		tidyBufFree(&docbuf);
+		tidyBufFree(&tidy_errbuf);
+		tidyRelease(tdoc);
+	}
+    else
+      printf("error\n");
+
+    // Clean-up
+    return err;
+
 }
 
 int main(int ac, char **av) {
 
    (void) ac;
-    link_handler(av[1], 0);
+	int	ret;
+    if ((ret = link_handler(av[1], 0)) < 0)
+	    return (ret);
+    return (0);
 }
 

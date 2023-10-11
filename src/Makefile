@@ -1,6 +1,6 @@
 NAME	= spider
 
-SRCS	= main.c data_getter.c data_parsing.c
+SRCS	= main.c data_getter.c data_parsing.c img_data_getter.c new_link_handler.c
 
 CC	= gcc
 
@@ -8,14 +8,13 @@ OBJS	= $(SRCS:.c=.o)
 
 CFLAGS	= -Wall -Wextra -Werror -g3
 
-INCLUDES = -I/usr/include/libxml2
 all	:	$(NAME)
 
 %.o	:	%.c
 		$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@ 
 
 $(NAME)	:	$(OBJS)
-		$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) -o $@ -lcurl -lxml2
+		$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) -o $@ -lcurl -ltidy 
 
 clean	:
 		rm -rf $(OBJS)

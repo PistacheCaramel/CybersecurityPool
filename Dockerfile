@@ -7,7 +7,7 @@ WORKDIR arachnida
 
 COPY ./src/* ./
 
-RUN apk add libxml2 libxml2-dev ; make
+RUN apk add tidyhtml-dev libxml2 libxml2-dev ; make
 
 CMD ["/bin/sh"]
 
