@@ -15,10 +15,9 @@ int	get_data_from_url(const char *url, TidyDoc *tdoc, TidyBuffer *docbuf, TidyBu
 
 	
     // libcurl Initialize
-	printf("Url:%s\n", url);
     CURL* curl = curl_easy_init();
     if (!curl) {
-        printf("Erreur lors de l'initialisation de libcurl\n");
+        write(2, "Error initializing libcurl\n", strlen("Error initializing libcurl\n"));
         return (1);
     }
 

@@ -17,21 +17,22 @@ const char	*find_domain_name(const char *url)
 	return (url);
 }
 
-void	build_url(const char *img_url, const char *url)
+int	build_url(const char *img_url, const char *url)
 {
 	char	*dest;
 
 	if (strncmp("https://", img_url, 8) == 0)
 	{
 		dest = (char *)img_url;
-		get_image_data_from_url(dest);
-		return ;
+		return (get_image_data_from_url(dest));
 	}
 	else
 	{
 		if (strncmp("/", img_url, 1) == 0)
 		{
 			dest = calloc(1, strlen(img_url) + strlen(url) + 1);
+			if (!dest)
+				return (1);
 			if (dest)
 			{
 				strncpy(dest, find_domain_name(url), strlen(url));
@@ -42,6 +43,8 @@ void	build_url(const char *img_url, const char *url)
 		else
 		{	
 			dest = calloc(1, strlen(img_url) + strlen(url) + 2);
+			if (!dest)
+				return (1);
 			if (dest)
 			{
 				strncpy(dest, find_domain_name(url), strlen(url));
@@ -51,8 +54,13 @@ void	build_url(const char *img_url, const char *url)
 			}
 		}
 	}	
-	get_image_data_from_url(dest);
+	if (get_image_data_from_url(dest))
+	{
+		free(dest);
+		return (1);
+	}
 	free(dest);
+	return (0);
 }
 
 int	get_img_attr(TidyNode child, const char *url)
@@ -65,7 +73,8 @@ int	get_img_attr(TidyNode child, const char *url)
 		if (strstr(tidyAttrName(attr), "src"))
 		{
 			printf("attr_name:%s\nurlimg:%s\n", tidyAttrName(attr), tidyAttrValue(attr));
-			build_url(tidyAttrValue(attr), url);
+			if (build_url(tidyAttrValue(attr), url))
+				return (1);
 			break;
 		}
 		attr = tidyAttrNext(attr);
@@ -73,7 +82,7 @@ int	get_img_attr(TidyNode child, const char *url)
 	return (0);
 }
 
-void	html_data_parsing(TidyDoc doc, TidyNode tnod, int indent, int lvl, const char *url)
+int	html_data_parsing(TidyDoc doc, TidyNode tnod, int indent, int lvl, const char *url)
 {
 	TidyNode child;
 
@@ -84,33 +93,16 @@ void	html_data_parsing(TidyDoc doc, TidyNode tnod, int indent, int lvl, const ch
 		ctmbstr name = tidyNodeGetName(child);
 		if (name)	/* if it has a name, then it's an HTML tag ... */
 		{
-			link_searcher(child, lvl, url);
+			if (link_searcher(child, lvl, url))
+				return (1);
 			if (strcmp("img", name) == 0)
 				get_img_attr(child, url);
 
 		}
- 		html_data_parsing(doc, child, indent + 4, lvl, url);
+ 		if (html_data_parsing(doc, child, indent + 4, lvl, url))
+			return (1);
 		child = tidyGetNext(child);
 		//recursive
 	}
-  /*for(child = tidyGetChild(tnod); child; child = tidyGetNext(child) ) {
-    ctmbstr name = tidyNodeGetName(child);
-    if(name) {
-      TidyAttr attr;
-      printf("%*.*s%s ", indent, indent, "<", name);
-      for(attr = tidyAttrFirst(child); attr; attr = tidyAttrNext(attr) ) {
-        printf("%s", tidyAttrName(attr));
-        tidyAttrValue(attr)?printf("=\"%s\" ",
-                                   tidyAttrValue(attr)):printf(" ");
-      }
-      printf(">\n");
-    }
-    else {
-      TidyBuffer buf;
-      tidyBufInit(&buf);
-      tidyNodeGetText(doc, child, &buf);
-      printf("%*.*s\n", indent, indent, buf.bp?(char *)buf.bp:"");
-      tidyBufFree(&buf);
-    }*/
-  
+	return (0);
 }

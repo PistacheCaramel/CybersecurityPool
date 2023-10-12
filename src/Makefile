@@ -1,6 +1,6 @@
 NAME	= spider
 
-SRCS	= main.c data_getter.c data_parsing.c img_data_getter.c new_link_handler.c
+SRCS	= main.c data_getter.c data_parsing.c img_data_getter.c new_link_handler.c utils.c
 
 CC	= gcc
 
