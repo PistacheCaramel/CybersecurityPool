@@ -7,7 +7,8 @@ int   link_handler(const char *url, int lvl)
 	TidyBuffer	tidy_errbuf = {0};
 	int 		err;
 
-	if (lvl > 2)
+	printf("\n\nLVL:%d\n\n", lvl);
+	if (lvl > 1)
         	return (0); 
      // Data getter
 	get_data_from_url(url, &tdoc, &docbuf, &tidy_errbuf, &err);

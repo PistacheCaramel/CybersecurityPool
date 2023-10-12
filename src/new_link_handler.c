@@ -15,8 +15,9 @@ int	new_link(int lvl, const char *url, TidyAttr href)
 		newlink = calloc(strlen(link_name) + strlen(domain_name) + 2, 1);
 		strcpy(newlink, domain_name);
 		if (strncmp("/", link_name, 1) != 0)
-			strcpy(newlink, "/");
+			strcat(newlink, "/");
 		strcat(newlink, link_name);
+		printf("LVL BEFORE:%d\nLINK:%s\nLINKNAME:%s\nDOMAINNAME:%s\n", lvl, newlink, link_name, domain_name);
 		link_handler(newlink, lvl + 1);
 	}
 	return (0);
