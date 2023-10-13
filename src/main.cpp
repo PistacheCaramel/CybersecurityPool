@@ -1,6 +1,7 @@
 #include "spider.h"
 
-char	**urls;
+std::vector<std::string> urls;
+std::vector<std::string> imgs;
 
 int   link_handler(const char *url, int lvl)
 {
@@ -9,7 +10,7 @@ int   link_handler(const char *url, int lvl)
 	TidyBuffer	tidy_errbuf = {0};
 	int 		err;
 
-	if (lvl > 1)
+	if (lvl > 7)
         	return (0); 
      // Data getter
 	if (get_data_from_url(url, &tdoc, &docbuf, &tidy_errbuf, &err))
@@ -41,17 +42,45 @@ int   link_handler(const char *url, int lvl)
 
 }
 
-int main(int ac, char **av) {
-
-   (void) ac;
-	int	ret;
-	urls = calloc(sizeof(char *), 400);
-	if ((ret = link_handler(av[1], 0)) < 0)
+int	img_request(const char *path)
+{
+   	std::vector<std::string>::iterator img;
+	
+	img = imgs.begin();
+	while (img != imgs.end())
 	{
-		free_urls();
-		return (ret);
+		if (get_image_data_from_url((*img).c_str(), path))
+			return (1);
+		img++;
+
 	}
-    free_urls();
+	return (0);
+}
+
+int main(int ac, char **av) {
+	
+	int		i;
+	std::string	input;
+	std::string	path;
+	int		lvl = 2;
+
+	path = "./data";
+	if (ac < 2)
+	{
+		std::cout << "Should at least take 1 argument" << std::endl;
+		return (0);
+	}
+	i = 1;
+	while (av[i])
+	{
+		input.append(av[i]);
+		i++;
+	}
+	int	ret;
+	if ((ret = link_handler(input.c_str(), lvl)) < 0)
+		return (ret);
+	if (img_request(path.c_str()))
+		return (1);
     return (0);
 }
 

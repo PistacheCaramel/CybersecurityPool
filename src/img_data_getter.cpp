@@ -18,7 +18,7 @@ const char	*set_img_name(const char *url)
 	return (ptr);
 }
 
-int		get_image_data_from_url(const char *url)
+int		get_image_data_from_url(const char *url, const char *path)
 {
 	int	ret;
 
@@ -36,12 +36,11 @@ int		get_image_data_from_url(const char *url)
 	 const char	*ptr;
 	
 	 ptr = set_img_name(url);
-	 if (check_urls(ptr) == 0)
-		return (0);
-	 filename = calloc(1, strlen(ptr) + strlen("img/") + 1);
+	 filename = (char*)calloc(1, strlen(ptr) + strlen(path) + 1);
 	 if (!filename)
 		 return (1);
-	 strcpy(filename, "img/");
+	 strcpy(filename, path);
+	 strcat(filename, "/");
 	 strcat(filename, ptr);
 	FILE	*fp = fopen(filename, "w+");
 	if (fp)

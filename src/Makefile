@@ -1,16 +1,16 @@
 NAME	= spider
 
-SRCS	= main.c data_getter.c data_parsing.c img_data_getter.c new_link_handler.c utils.c
+SRCS	= main.cpp data_getter.cpp data_parsing.cpp img_data_getter.cpp new_link_handler.cpp utils.cpp 
 
-CC	= gcc
+CC	= c++
 
-OBJS	= $(SRCS:.c=.o)
+OBJS	= $(SRCS:.cpp=.o)
 
-CFLAGS	= -Wall -Wextra -Werror -g3
+CFLAGS	= -Wall -Wextra -Werror -g3  -Wno-missing-field-initializers
 
 all	:	$(NAME)
 
-%.o	:	%.c
+%.o	:	%.cpp
 		$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@ 
 
 $(NAME)	:	$(OBJS)

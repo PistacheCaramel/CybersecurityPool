@@ -12,7 +12,7 @@ const char	*find_domain_name(const char *url)
 			ptr++;
 		ptr = strstr((const char *)ptr, "/");
 		if (ptr)
-			*ptr = 0i;
+			*ptr = 0;
 	}
 	return (url);
 }
@@ -24,13 +24,14 @@ int	build_url(const char *img_url, const char *url)
 	if (strncmp("https://", img_url, 8) == 0)
 	{
 		dest = (char *)img_url;
-		return (get_image_data_from_url(dest));
+		handle_img_url(dest);	
+		return (0);
 	}
 	else
 	{
 		if (strncmp("/", img_url, 1) == 0)
 		{
-			dest = calloc(1, strlen(img_url) + strlen(url) + 1);
+			dest = (char*)calloc(1, strlen(img_url) + strlen(url) + 1);
 			if (!dest)
 				return (1);
 			if (dest)
@@ -42,7 +43,7 @@ int	build_url(const char *img_url, const char *url)
 		}
 		else
 		{	
-			dest = calloc(1, strlen(img_url) + strlen(url) + 2);
+			dest = (char*)calloc(1, strlen(img_url) + strlen(url) + 2);
 			if (!dest)
 				return (1);
 			if (dest)
@@ -53,12 +54,8 @@ int	build_url(const char *img_url, const char *url)
 				printf("%s\n", dest);
 			}
 		}
-	}	
-	if (get_image_data_from_url(dest))
-	{
-		free(dest);
-		return (1);
 	}
+	handle_img_url(dest);	
 	free(dest);
 	return (0);
 }
@@ -85,6 +82,8 @@ int	get_img_attr(TidyNode child, const char *url)
 int	html_data_parsing(TidyDoc doc, TidyNode tnod, int indent, int lvl, const char *url)
 {
 	TidyNode child;
+	std::vector<TidyAttr> links;
+	std::vector<TidyAttr>::iterator	it;
 
 	(void) lvl;
 	child = tidyGetChild(tnod);
@@ -92,9 +91,11 @@ int	html_data_parsing(TidyDoc doc, TidyNode tnod, int indent, int lvl, const cha
 	{
 		ctmbstr name = tidyNodeGetName(child);
 		if (name)	/* if it has a name, then it's an HTML tag ... */
-		{
-			if (link_searcher(child, lvl, url))
-				return (1);
+		{	TidyAttr	href;
+
+			href = tidyAttrGetById(child, TidyAttr_HREF);
+			if (href)
+				links.push_back(href);
 			if (strcmp("img", name) == 0)
 				get_img_attr(child, url);
 
@@ -103,6 +104,13 @@ int	html_data_parsing(TidyDoc doc, TidyNode tnod, int indent, int lvl, const cha
 			return (1);
 		child = tidyGetNext(child);
 		//recursive
+	}
+	it = links.begin();
+	while (it != links.end())
+	{
+		if (new_link(lvl, url, *it))
+			return (1);
+		it++;
 	}
 	return (0);
 }
