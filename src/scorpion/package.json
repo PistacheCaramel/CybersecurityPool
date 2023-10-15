@@ -2,8 +2,9 @@
   "name": "scorpion",
   "version": "1.0.0",
   "description": "A little program in js to extract metadatas from images",
-  "main": "main.js",
+  "main": "main.mjs",
   "scripts": {
+    "start": "node main.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
