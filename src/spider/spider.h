@@ -11,7 +11,8 @@
 #include <vector>
 #include <string>
 #include <iostream>
-
+#include <math.h>
+extern int			levl;
 extern std::vector<std::string> urls;
 extern std::vector<std::string> imgs;
 

@@ -2,7 +2,7 @@
 
 std::vector<std::string> urls;
 std::vector<std::string> imgs;
-
+int			levl;
 int   link_handler(const char *url, int lvl)
 {
 	TidyDoc		tdoc;
@@ -10,7 +10,7 @@ int   link_handler(const char *url, int lvl)
 	TidyBuffer	tidy_errbuf = {0};
 	int 		err;
 
-	if (lvl > 0)
+	if (lvl >= levl)
         	return (0); 
      // Data getter
 	if (get_data_from_url(url, &tdoc, &docbuf, &tidy_errbuf, &err))
@@ -24,7 +24,7 @@ int   link_handler(const char *url, int lvl)
 			if(err >= 0)
 			{
 				err = tidyRunDiagnostics(tdoc); /* load tidy error buffer */
-				printf("///////    STOOOOP ////\n");
+				std::cout << "------END OF REQUEST------" << std::endl;
 				if(err >= 0)
 				{
 					err = html_data_parsing(tdoc, tidyGetRoot(tdoc), 0, lvl, url); /* walk the tree */
@@ -65,6 +65,7 @@ int main(int ac, char **av) {
 	int		lvl = 0;
 
 	path = "./data";
+	levl = 1;
 	if (ac < 2)
 	{
 		std::cout << "Should at least take 1 argument" << std::endl;
@@ -75,9 +76,53 @@ int main(int ac, char **av) {
 	{
 		input.append(av[i]);
 		i++;
+		if (av[i])
+			input.append(" ");
 	}
 	int	ret;
-	if ((ret = link_handler(input.c_str(), lvl)) < 0)
+	std::string::iterator	it;
+	it = input.begin();
+	while (it != input.end() && *it == '-')
+	{
+		if (*(it + 1) == 'r' && *(it + 2) == ' ')
+		{
+			levl = 5;
+			it += 2;
+			if (it + 1  != input.end() 
+					&& *(it + 1) == '-' && it + 2 != input.end()
+					&& *(it + 2) == 'l' && it + 3 != input.end()
+					&& *(it + 3) == ' ' && it + 4 != input.end()
+					&& isdigit(*(it + 4)))
+			{
+				it += 4;
+				levl = 0;
+				while (it != input.end() && isdigit(*it))
+				{
+					int	power = 0;
+					lvl = lvl * pow(10, power)  + (*it) - 48;
+					power++;
+					it++;
+				}
+			}
+		}
+		else if (it + 1 != input.end() && *(it + 1) == 'p'
+				&& it + 2 != input.end())
+		{
+			size_t	pos;
+			it += 3;
+			pos = std::distance(input.begin(), it);
+			while (it != input.end() && (*it) != ' ')
+				it++;
+			path = input.substr(pos, std::distance(input.begin(), it) - pos).c_str();
+		}
+		else
+			it++;
+		while (it != input.end() && *it == ' ')
+			it++;
+		input.erase(input.begin(), it);
+		it = input.begin();
+	}
+	if (input.empty() == false && (ret = link_handler(input.c_str(), lvl)) < 0)
 		return (ret);
 	if (img_request(path.c_str()))
 		return (1);

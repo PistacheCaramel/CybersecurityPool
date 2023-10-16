@@ -36,7 +36,7 @@ int		get_image_data_from_url(const char *url, const char *path)
 	 const char	*ptr;
 	
 	 ptr = set_img_name(url);
-	 filename = (char*)calloc(1, strlen(ptr) + strlen(path) + 1);
+	 filename = (char*)calloc(1, strlen(ptr) + strlen(path) + 3);
 	 if (!filename)
 		 return (1);
 	 strcpy(filename, path);
