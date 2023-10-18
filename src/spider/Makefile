@@ -21,6 +21,7 @@ clean	:
 
 fclean	:	clean
 		rm -rf $(NAME)
+		rm -rf ./data/*
 
 re	:	fclean
 		make
