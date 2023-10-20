@@ -57,10 +57,13 @@ int	dec_data(ENV_CIPHER_CTX *ctx)
 	int		inlen;
 	int		outlen;
 
-	memcpy(iv, "ft_otp", 7);
+	memcpy(iv, "ft_otp", 7);//ouvrir ft_otp.key
 	EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char *)get_key.c_str(), iv);
-	while ((inlen = fread(in, 1,//in progress	
-
+	while ((inlen = fread(in, 1, 1024, )) > 0)
+	{
+		EVP_DecryptUpdate(ctx, out, &outlen, in
+	}
+//on progress
 }
 
 int	main(int ac, char **av)
