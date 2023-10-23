@@ -28,18 +28,16 @@ int	enc_data(std::string in, EVP_CIPHER_CTX *ctx)
 {
 	unsigned char	out[in.size() + EVP_MAX_BLOCK_LENGTH];
 	FILE		*fcry = fopen("ft_otp.key", "wb");
-	int		ret;
 	int		size;
 	unsigned char	iv[7];
 	
-	std::cout << "here" << std::endl;
 	bzero(out, in.size() + 1);
 	memcpy(iv, "ft_otp", 7);
 	size = in.size() + EVP_MAX_BLOCK_LENGTH;
 	//	Setting crypt context
 	EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char *)get_key().c_str(), iv);
 	//	Encrypting the key
-	ret = EVP_EncryptUpdate(ctx, out, &size, (const unsigned char *)in.c_str(), in.size());
+	EVP_EncryptUpdate(ctx, out, &size, (const unsigned char *)in.c_str(), in.size());
 	fwrite(out, 1, size, fcry);
 	EVP_EncryptFinal_ex(ctx, out, &size);
 	fwrite(out, 1, size, fcry);
@@ -49,21 +47,28 @@ int	enc_data(std::string in, EVP_CIPHER_CTX *ctx)
 	return (0);
 }
 
-int	dec_data(ENV_CIPHER_CTX *ctx)
+int	dec_data(EVP_CIPHER_CTX *ctx)
 {
 	unsigned char	iv[7];
 	unsigned char	in[1024];
 	unsigned char	out[1024];
 	int		inlen;
 	int		outlen;
+	FILE		*infile = fopen("ft_otp.key", "rb");
 
 	memcpy(iv, "ft_otp", 7);//ouvrir ft_otp.key
-	EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char *)get_key.c_str(), iv);
-	while ((inlen = fread(in, 1, 1024, )) > 0)
+	EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char *)get_key().c_str(), iv);
+	while ((inlen = fread(in, 1, 1024, infile)) > 0)
 	{
-		EVP_DecryptUpdate(ctx, out, &outlen, in
+		EVP_DecryptUpdate(ctx, out, &outlen, in, inlen);
+		write(1, out, outlen);
 	}
-//on progress
+	EVP_DecryptFinal_ex(ctx, out, &outlen);
+	write(1, out, outlen);
+	write(1, "\n", 1);
+	EVP_CIPHER_CTX_free(ctx);
+	fclose(infile);
+	return (0);
 }
 
 int	main(int ac, char **av)
@@ -93,4 +98,5 @@ int	main(int ac, char **av)
 		buff.push_back(c);
 	close(fd);
 	enc_data(buff, EVP_CIPHER_CTX_new());
+	dec_data(EVP_CIPHER_CTX_new());
 }
