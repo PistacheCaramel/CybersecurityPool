@@ -26,46 +26,50 @@ std::string	get_key(void)
 
 int	enc_data(std::string in, EVP_CIPHER_CTX *ctx)
 {
-	unsigned char	out[in.size() + EVP_MAX_BLOCK_LENGTH];
-	FILE		*fcry = fopen("ft_otp.key", "wb");
+	unsigned char	out[in.size() + EVP_MAX_BLOCK_LENGTH + 1];
+	int		fcry = open("ft_otp.key", O_CREAT | O_WRONLY);
 	int		size;
-	unsigned char	iv[7];
+	std::string	iv("ft_otp");
 	
-	bzero(out, in.size() + 1);
-	memcpy(iv, "ft_otp", 7);
-	size = in.size() + EVP_MAX_BLOCK_LENGTH;
+	if (fcry <= 0)
+		return (1);
+	bzero(out, in.size() + 1 + EVP_MAX_BLOCK_LENGTH);
 	//	Setting crypt context
-	EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char *)get_key().c_str(), iv);
+	EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char *)get_key().c_str(), (const unsigned char *)iv.c_str());
 	//	Encrypting the key
 	EVP_EncryptUpdate(ctx, out, &size, (const unsigned char *)in.c_str(), in.size());
-	fwrite(out, 1, size, fcry);
+	std::cout << "size:" << size << std::endl;
+	write(1, out, size);
+	std::cout << "////////" << std::endl;
+	std::cout << "retour write:" << write(fcry, out, size - 1) << std::endl;
 	EVP_EncryptFinal_ex(ctx, out, &size);
-	fwrite(out, 1, size, fcry);
+	std::cout << "retour write 2:" << write(fcry, out, size) << std::endl;
 	//	Free ressources
+	close(fcry);
 	EVP_CIPHER_CTX_free(ctx);
-	fclose(fcry);
 	return (0);
 }
 
 int	dec_data(EVP_CIPHER_CTX *ctx)
 {
-	unsigned char	iv[7];
+	std::string	iv("ft_otp");
 	unsigned char	in[1024];
 	unsigned char	out[1024];
 	int		inlen;
 	int		outlen;
 	FILE		*infile = fopen("ft_otp.key", "rb");
 
-	memcpy(iv, "ft_otp", 7);//ouvrir ft_otp.key
-	EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char *)get_key().c_str(), iv);
+	bzero(in, 1024);
+	bzero(out, 1024);
+	EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char *)get_key().c_str(), (const unsigned char *)iv.c_str());
 	while ((inlen = fread(in, 1, 1024, infile)) > 0)
 	{
 		EVP_DecryptUpdate(ctx, out, &outlen, in, inlen);
 		write(1, out, outlen);
+		bzero(out, 1024);
 	}
 	EVP_DecryptFinal_ex(ctx, out, &outlen);
 	write(1, out, outlen);
-	write(1, "\n", 1);
 	EVP_CIPHER_CTX_free(ctx);
 	fclose(infile);
 	return (0);
