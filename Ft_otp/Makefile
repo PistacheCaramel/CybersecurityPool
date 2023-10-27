@@ -1,28 +1,35 @@
-NAME	= ft_otp 
+NAME	= ft_otp
 
-SRCS	= main.cpp
+CXX		= c++
 
-CC	= c++
+CXXFLAGS	= -Wall -Wextra -Werror -MMD -std=c++98 -g3
 
+OPSSLFLAGS = $$(pkg-config --cflags --libs openssl)
+
+SRCS	= main.cpp Crypt.cpp
 OBJS	= $(SRCS:.cpp=.o)
 
-CFLAGS	= -Wall -Wextra -Werror -g3  
-all	:	$(NAME)
+DEPS	= $(OBJS:.o=.d)
 
-%.o	:	%.cpp
-		$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@ 
+IFLAGS	= -I.
+
+all		:	$(NAME)
+
 $(NAME)	:	$(OBJS)
-		$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) -o $@ -lssl -lcrypto
+	$(CXX) $(CXXFLAGS) $(IFLAGS) -o $@ $^ $(OPSSLFLAGS)
 
+%.o		:	%.cpp
+			$(CXX) $(CXXFLAGS) $(IFLAGS) -c $< -o $@
 
 clean	:
-		rm -rf $(OBJS)
+			$(RM) $(DEPS)
+			$(RM) $(OBJS)
 
 fclean	:	clean
-		rm -rf $(NAME)
+			$(RM) $(NAME)
 
-re	:	fclean
-		make
+re		:	fclean all
+
+-include $(DEPS)
 
 .PHONY	:	all fclean clean re
-
