@@ -1,0 +1,36 @@
+version: "3"
+
+services:
+        nginx:
+                build: nginx/.
+                image: nginx
+                container_name: nginx
+                restart: always
+                ports: 
+                        - "80:80"
+                networks:
+                        - "network"
+        ssh:
+                build: ssh/.
+                container_name: ssh
+                image: ssh
+                ports: 
+                        - "4242:4242"
+                restart: always
+
+                networks: 
+                        - "network"
+
+        tor:
+
+                build: tor/.
+                container_name: tor
+                image: tor
+
+                restart: always
+                networks:
+                         - "network"
+
+networks:
+        network:
+                driver: bridge
