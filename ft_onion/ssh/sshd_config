@@ -12,7 +12,7 @@
 
 Port 4242
 #AddressFamily any
-ListenAddress 127.0.0.1
+#ListenAddress 0.0.0.0
 #ListenAddress ::
 
 #HostKey /etc/ssh/ssh_host_rsa_key
@@ -75,17 +75,17 @@ PasswordAuthentication no
 # be allowed through the KbdInteractiveAuthentication and
 # PasswordAuthentication.  Depending on your PAM configuration,
 # PAM authentication via KbdInteractiveAuthentication may bypass
-# the setting of "PermitRootLogin without-password".
+# the setting of "PermitRootLogin prohibit-password".
 # If you just want the PAM account and session checks to run without
 # PAM authentication, then enable this but set PasswordAuthentication
 # and KbdInteractiveAuthentication to 'no'.
 #UsePAM no
-
+#AllowGroups ssh_connects
 #AllowAgentForwarding yes
 # Feel free to re-enable these if your use case requires them.
-#AllowTcpForwarding no
-#GatewayPorts no
-#X11Forwarding no
+AllowTcpForwarding no
+GatewayPorts no
+X11Forwarding no
 #X11DisplayOffset 10
 #X11UseLocalhost yes
 #PermitTTY yes

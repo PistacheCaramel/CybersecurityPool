@@ -1,0 +1,3 @@
+Intall and launch: make
+to connect with ssh: -install torsocks
+		     -torsocks ssh user@mondomaine.onion -p 4242

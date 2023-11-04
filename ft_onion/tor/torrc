@@ -76,8 +76,8 @@ DataDirectory /usr/local/lib/tor
 #HiddenServicePort 80 127.0.0.1:80
 #HiddenServicePort 22 127.0.0.1:22
 HiddenServiceDir /usr/local/lib/tor/mondomaine.com/
-HiddenServicePort 80 127.0.0.1:80
-HiddenServicePort 4242 127.0.0.1:4242
+HiddenServicePort 80 nginx:80
+HiddenServicePort 4242 ssh:4242
 
 ################ This section is just for relays #####################
 #
